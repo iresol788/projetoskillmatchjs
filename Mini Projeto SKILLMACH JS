@@ -1,0 +1,203 @@
+//Classe base e uso do this
+class candidato {
+    constructor(nome, habilidades) {
+        this.nome = nome;
+        this.habilidades = habilidades;
+    }
+
+    mostrarHabilidades() {
+        console.log(`${this.nome} possui: ${this.habilidades.join(", ")}`);
+    }
+}
+
+//Herança
+class Candidato extends Pessoa {
+    constructor(nome, areaInteresse, habilidades, tempoExperiencia) {
+        super(nome, habilidades);
+        this.areaInteresse = areaInteresse;
+        this.tempoExperiencia = tempoExperiencia;
+    }
+}
+
+//Classe que representa uma vaga
+class Vaga {
+    constructor(empresa, cargo, requisitos) {
+        this.empresa = empresa;
+        this.cargo = cargo;
+        this.requisitos = requisitos;
+    }
+}
+
+//Herança com comportamento especializado
+class VagaComCompatibilidade extends Vaga {
+    calcularCompatibilidade(candidato) {
+        const possui = this.requisitos.filter(
+            requisito => candidato.habilidades.includes(requisito)
+        );
+
+        const faltantes = this.requisitos.filter(
+            requisito => !candidato.habilidades.includes(requisito)
+        );
+
+        const percentual = this.requisitos.length === 0
+            ? 0
+            : Math.round((possui.length / this.requisitos.length) * 100);
+
+        let classificacao;
+
+        //Estrutura de decisão
+        if (percentual >= 80) {
+            classificacao = "Alta compatibilidade";
+        } else if (percentual >= 50) {
+            classificacao = "Média compatibilidade";
+        } else {
+            classificacao = "Baixa compatibilidade";
+        }
+
+        return {
+            empresa: this.empresa,
+            cargo: this.cargo,
+            possui,
+            faltantes,
+            percentual,
+            classificacao
+        };
+    }
+}
+
+//Perfil fictício da candidata
+const candidato = new Candidato(
+    "Iris Oliveira",
+    "Desenvolvimento Front-End",
+    ["HTML", "CSS", "JavaScript"],
+    "6 meses"
+);
+
+//Três vagas fictícias
+const vagas = [
+    new VagaComCompatibilidade(
+        "Teca Bruxa Sul",
+        "Front-End Júnior A",
+        ["HTML", "CSS", "JavaScript", "React"]
+    ),
+    new VagaComCompatibilidade(
+        "InovaWeb On",
+        "Desenvolvedora Front-End B",
+        ["HTML", "CSS", "Vue"]
+    ),
+    new VagaComCompatibilidade(
+        "Pixel Lilás Digital",
+        "Desenvolvedora Web C",
+        ["HTML", "JavaScript", "Git", "React"]
+    )
+];
+
+//Callback: recebe uma função como parâmetro
+function analisarVaga(vaga, candidato, callback) {
+    const resultado = vaga.calcularCompatibilidade(candidato);
+    callback(resultado);
+}
+
+//Closure: preserva o contador entre chamadas
+function criarContador() {
+    let total = 0;
+
+    return function() {
+        total++;
+        return total;
+    };
+}
+
+const contarAnalises = criarContador();
+
+//Promise: simula carregamento de vagas
+function carregarVagas() {
+    return new Promise(resolve => {
+        setTimeout(() => {
+            resolve(vagas);
+        }, 500);
+    });
+}
+
+// Análise assíncrona principal
+async function executarAnalise() {
+    console.log("=== SKILLMATCH JS ===");
+    console.log("Carregando vagas");
+
+    const listaVagas = await carregarVagas();
+
+    candidato.mostrarHabilidades();
+    console.log("Área de interesse:", candidato.areaInteresse);
+    console.log("Experiência:", candidato.tempoExperiencia);
+    console.log("\n=== RESULTADOS ===");
+
+    // map(): calcula todas as compatibilidades
+    const resultados = listaVagas.map(vaga =>
+        vaga.calcularCompatibilidade(candidato)
+    );
+
+    //forEach(): apresenta os resultados
+    resultados.forEach(resultado => {
+        console.log(`\nEmpresa: ${resultado.empresa}`);
+        console.log(`Cargo: ${resultado.cargo}`);
+        console.log(`Possui: ${resultado.possui.join(", ") || "Nenhuma"}`);
+        console.log(`Faltantes: ${resultado.faltantes.join(", ") || "Nenhuma"}`);
+        console.log(`Compatibilidade: ${resultado.percentual}%`);
+        console.log(`Classificação: ${resultado.classificacao}`);
+    });
+
+    //reduce(): encontra a vaga de maior compatibilidade
+    if (resultados.length === 0) {
+        console.log("Nenhuma vaga disponível para análise.");
+        return;
+    }
+
+    const melhorVaga = resultados.reduce((melhor, atual) =>
+        atual.percentual > melhor.percentual ? atual : melhor
+    );
+
+    console.log("\n=== MELHOR VAGA ===");
+    console.log(`${melhorVaga.empresa} - ${melhorVaga.cargo}`);
+    console.log(`Compatibilidade: ${melhorVaga.percentual}%`);
+
+    //Recomendação de estudo
+    console.log("\n=== RECOMENDAÇÃO DE ESTUDO ===");
+
+    if (melhorVaga.faltantes.length > 0) {
+        console.log(
+            "Prioridade: estudar os requisitos que faltam na vaga de maior compatibilidade."
+        );
+
+        melhorVaga.faltantes.forEach(habilidade => {
+            console.log(`- Estudar ${habilidade}`);
+        });
+    } else {
+        console.log("A candidata possui todos os requisitos dessa vaga!");
+    }
+
+    //Demonstra o callback no fluxo real
+    analisarVaga(listaVagas[0], candidato, resultado => {
+        console.log(
+            `\nCallback: análise concluída para ${resultado.cargo}.`
+        );
+    });
+
+    //Demonstra a closure
+    console.log("\nContador de demonstração:", contarAnalises());
+    console.log("Contador de demonstração:", contarAnalises());
+
+    // Método adicional: every()
+    const todasCompatíveis = resultados.every(
+        resultado => resultado.percentual === 100
+    );
+
+    console.log(
+        "\nTodas as vagas têm 100% de compatibilidade?",
+        todasCompatíveis ? "Sim" : "Não"
+    );
+}
+
+// Inicia a aplicação
+executarAnalise().catch(erro => {
+    console.error("Erro ao executar a análise:", erro);
+});
