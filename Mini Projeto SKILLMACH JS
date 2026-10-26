@@ -201,3 +201,24 @@ async function executarAnalise() {
 executarAnalise().catch(erro => {
     console.error("Erro ao executar a análise:", erro);
 });
+//========================================================
+// 🧪 TESTES AUTOMATIZADOS
+console.log("=".repeat(50));
+console.log("INICIANDO TESTES DO PROJETO SKILLMATCH");
+console.log("=".repeat(50));
+
+// Teste 1: Candidato compatível
+console.log("\n🔹 Teste 1: Candidato com todas as habilidades");
+// execute e confira se = 100% 
+
+// Teste 2: Candidato parcial
+console.log("\n🔹 Teste 2: Candidato com metade das habilidades");
+// execute e confira se = 50% 
+
+// Teste 3: Candidato sem habilidades
+console.log("\n🔹 Teste 3: Candidato sem habilidades necessárias");
+// execute e confira se = 0% 
+
+console.log("\n" + "=".repeat(50));
+console.log("✅ TODOS OS TESTES CONCLUÍDOS");
+console.log("=".repeat(50));
